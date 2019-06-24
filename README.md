@@ -1,4 +1,5 @@
-# useResource hook
+# useResource
+Using async resources without tears (and boilerplate)
 
 ## How to use
 ```tsx
