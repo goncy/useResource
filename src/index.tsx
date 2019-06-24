@@ -4,9 +4,9 @@ import * as React from 'react';
 interface Handlers<T> {
   get: (id: string, options?: any) => Promise<T>;
   list: (options?: any) => Promise<T[]>;
-  update: (resource: T, options?: any) => Promise<T>;
+  update: (resource: Partial<T>, options?: any) => Promise<T>;
   remove: (id: string, options?: any) => Promise<void>;
-  create: (resource: Omit<T, "id">, options?: any) => Promise<T>;
+  create: (resource: Partial<T>, options?: any) => Promise<T>;
 }
 
 // Output
@@ -20,9 +20,9 @@ interface State<T> {
 interface Methods<T> {
   get: (id: string, options?: any) => Promise<T>;
   list: (options?: any) => Promise<T[]>;
-  update: (resource: T, options?: any) => Promise<T>;
+  update: (resource: PartialResource<T>, options?: any) => Promise<T>;
   remove: (id: string, options?: any) => Promise<string>;
-  create: (resource: Omit<T, 'id'>, options?: any) => Promise<T>;
+  create: (resource: Partial<T>, options?: any) => Promise<T>;
   select: (id: string) => T;
 }
 
@@ -41,10 +41,10 @@ type Action<T> =
   | { type: 'LIST_RESOURCE_STARTED' }
   | { type: 'LIST_RESOURCE_RESOLVED'; payload: T[] }
   | { type: 'LIST_RESOURCE_REJECTED'; payload: string }
-  | { type: 'UPDATE_RESOURCE_STARTED'; payload: T }
+  | { type: 'UPDATE_RESOURCE_STARTED'; payload: PartialResource<T> }
   | { type: 'UPDATE_RESOURCE_RESOLVED'; payload: T }
   | { type: 'UPDATE_RESOURCE_REJECTED'; payload: ActionError }
-  | { type: 'CREATE_RESOURCE_STARTED'; payload: Omit<T, "id"> }
+  | { type: 'CREATE_RESOURCE_STARTED'; payload: Partial<T> }
   | { type: 'CREATE_RESOURCE_RESOLVED'; payload: T }
   | { type: 'CREATE_RESOURCE_REJECTED'; payload: string }
   | { type: 'REMOVE_RESOURCE_STARTED'; payload: string }
@@ -53,7 +53,7 @@ type Action<T> =
   | { type: 'SELECT_RESOURCE'; payload: string };
 
 // Helpers
-type Dictionary<T> = { [id: string]: T };
+type Dictionary<T> = Record<string, T>;
 
 interface ResourceManager<T> {
   resources: Dictionary<T & Meta>;
@@ -61,6 +61,8 @@ interface ResourceManager<T> {
   error: null | string;
   selected: null | string;
 }
+
+type PartialResource<T> = Partial<T> & Identified;
 
 interface Meta {
   meta: {
@@ -319,7 +321,7 @@ export default function useResource<T extends Identified>(
       });
   }
 
-  function handleUpdate(resource: T, options?: any): Promise<T> {
+  function handleUpdate(resource: PartialResource<T>, options?: any): Promise<T> {
     dispatch({ type: 'UPDATE_RESOURCE_STARTED', payload: resource });
 
     return handlers
@@ -344,7 +346,7 @@ export default function useResource<T extends Identified>(
       });
   }
 
-  function handleCreate(resource: Omit<T, "id">, options?: any): Promise<T> {
+  function handleCreate(resource: Partial<T>, options?: any): Promise<T> {
     dispatch({ type: 'CREATE_RESOURCE_STARTED', payload: resource });
 
     return handlers

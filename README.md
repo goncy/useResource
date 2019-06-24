@@ -39,9 +39,9 @@ interface State<T> {
 interface Methods<T> {
   get: (id: string, options?: any) => Promise<T>;
   list: (options?: any) => Promise<T[]>;
-  update: (resource: T, options?: any) => Promise<T>;
+  update: (resource: Partial<T>, options?: any) => Promise<T>;
   remove: (id: string, options?: any) => Promise<string>;
-  create: (resource: Omit<T, "id">, options?: any) => Promise<T>;
+  create: (resource: Partial<T>, options?: any) => Promise<T>;
   select: (id: string) => T;
 }
 ```
