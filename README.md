@@ -1,6 +1,11 @@
 # useResource
 Using async resources without tears (and boilerplate)
 
+## Installation
+```bash
+yarn add use-resource-hook
+```
+
 ## How to use
 ```tsx
 interface User {
