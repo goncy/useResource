@@ -82,7 +82,7 @@ const EMPTY_RESOURCE_MANAGER = {
   selected: null,
 };
 
-function reducer<T extends Identified>(
+function resourceManagerReducer<T extends Identified>(
   state: ResourceManager<T> = EMPTY_RESOURCE_MANAGER,
   action: Action<T>
 ): ResourceManager<T> {
@@ -263,15 +263,16 @@ function reducer<T extends Identified>(
 }
 
 export default function useResource<T extends Identified>(
-  handlers: Handlers<T>
+  _handlers: Handlers<T>
 ): [State<T>, Methods<T>] {
-  const typedReducer = React.useCallback(
+  const handlers = React.useMemo(() => _handlers, []);
+  const reducer = React.useCallback(
     (state: ResourceManager<T>, action: Action<T>): ResourceManager<T> =>
-      reducer<T>(state, action),
+    resourceManagerReducer<T>(state, action),
     []
   );
 
-  const [state, dispatch] = React.useReducer(typedReducer, EMPTY_RESOURCE_MANAGER);
+  const [state, dispatch] = React.useReducer(reducer, EMPTY_RESOURCE_MANAGER);
 
   const handleGet = React.useCallback((id: string, options?: any): Promise<T> => {
     dispatch({ type: 'GET_RESOURCE_STARTED', payload: id });
@@ -398,7 +399,7 @@ export default function useResource<T extends Identified>(
     dispatch({ type: 'SELECT_RESOURCE', payload: id });
 
     return state.resources[id];
-  }, [handlers, dispatch, state.resources])
+  }, [dispatch, state.resources])
 
   return [
     {
