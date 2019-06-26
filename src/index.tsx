@@ -401,20 +401,24 @@ export default function useResource<T extends Identified>(
     return state.resources[id];
   }, [dispatch, state.resources])
 
+  const memoizedState = React.useMemo(() => ({
+    resources: Object.values(state.resources),
+    selected: state.selected ? state.resources[state.selected] : null,
+    action: state.action,
+    error: state.error,
+  }), [state.resources, state.selected, state.action, state.error])
+
+  const memoizedMethods = React.useMemo(() => ({
+    get: handleGet,
+    list: handleList,
+    update: handleUpdate,
+    remove: handleRemove,
+    create: handleCreate,
+    select: handleSelect,
+  }), [handleGet, handleList, handleUpdate, handleRemove, handleCreate, handleSelect])
+
   return [
-    {
-      resources: Object.values(state.resources),
-      selected: state.selected ? state.resources[state.selected] : null,
-      action: state.action,
-      error: state.error,
-    },
-    {
-      get: handleGet,
-      list: handleList,
-      update: handleUpdate,
-      remove: handleRemove,
-      create: handleCreate,
-      select: handleSelect,
-    },
+    memoizedState,
+    memoizedMethods
   ];
 }
