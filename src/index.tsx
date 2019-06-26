@@ -263,8 +263,9 @@ function resourceManagerReducer<T extends Identified>(
 }
 
 export default function useResource<T extends Identified>(
-  handlers: Handlers<T>
+  _handlers: Handlers<T>
 ): [State<T>, Methods<T>] {
+  const handlers = React.useMemo(() => _handlers, [_handlers]);
   const reducer = React.useCallback(
     (state: ResourceManager<T>, action: Action<T>): ResourceManager<T> =>
     resourceManagerReducer<T>(state, action),
