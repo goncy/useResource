@@ -265,15 +265,15 @@ function reducer<T extends Identified>(
 export default function useResource<T extends Identified>(
   handlers: Handlers<T>
 ): [State<T>, Methods<T>] {
-  const _reducer = React.useCallback(
+  const typedReducer = React.useCallback(
     (state: ResourceManager<T>, action: Action<T>): ResourceManager<T> =>
       reducer<T>(state, action),
     []
   );
 
-  const [state, dispatch] = React.useReducer(_reducer, EMPTY_RESOURCE_MANAGER);
+  const [state, dispatch] = React.useReducer(typedReducer, EMPTY_RESOURCE_MANAGER);
 
-  function handleGet(id: string, options?: any): Promise<T> {
+  const handleGet = React.useCallback((id: string, options?: any): Promise<T> => {
     dispatch({ type: 'GET_RESOURCE_STARTED', payload: id });
 
     return handlers
@@ -296,9 +296,9 @@ export default function useResource<T extends Identified>(
 
         throw error.message;
       });
-  }
+  }, [handlers, dispatch])
 
-  function handleList(options?: any): Promise<T[]> {
+  const handleList = React.useCallback((options?: any): Promise<T[]> => {
     dispatch({ type: 'LIST_RESOURCE_STARTED' });
 
     return handlers
@@ -319,9 +319,9 @@ export default function useResource<T extends Identified>(
 
         throw error.message;
       });
-  }
+  }, [handlers, dispatch])
 
-  function handleUpdate(resource: PartialResource<T>, options?: any): Promise<T> {
+  const handleUpdate = React.useCallback((resource: PartialResource<T>, options?: any): Promise<T> => {
     dispatch({ type: 'UPDATE_RESOURCE_STARTED', payload: resource });
 
     return handlers
@@ -344,9 +344,9 @@ export default function useResource<T extends Identified>(
 
         throw error.message;
       });
-  }
+  }, [handlers, dispatch])
 
-  function handleCreate(resource: Partial<T>, options?: any): Promise<T> {
+  const handleCreate = React.useCallback((resource: Partial<T>, options?: any): Promise<T> => {
     dispatch({ type: 'CREATE_RESOURCE_STARTED', payload: resource });
 
     return handlers
@@ -369,9 +369,9 @@ export default function useResource<T extends Identified>(
 
         throw error.message;
       });
-  }
+  }, [handlers, dispatch])
 
-  function handleRemove(id: string, options?: any): Promise<string> {
+  const handleRemove = React.useCallback((id: string, options?: any): Promise<string> => {
     dispatch({ type: 'REMOVE_RESOURCE_STARTED', payload: id });
 
     return handlers
@@ -392,13 +392,13 @@ export default function useResource<T extends Identified>(
 
         throw error.message;
       });
-  }
+  }, [handlers, dispatch])
 
-  function handleSelect(id: string) {
+  const handleSelect = React.useCallback((id: string) => {
     dispatch({ type: 'SELECT_RESOURCE', payload: id });
 
     return state.resources[id];
-  }
+  }, [handlers, dispatch, state.resources])
 
   return [
     {
