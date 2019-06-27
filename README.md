@@ -1,6 +1,9 @@
 # useResource
 Using async resources without tears (and boilerplate)
 
+## Demo
+[https://codesandbox.io/s/useresource-hook-demo-y9sw9](Codesandbox)
+
 ## Installation
 ```bash
 yarn add use-resource-hook
