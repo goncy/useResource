@@ -68,12 +68,12 @@ interface State<T> {
   error: null | string;
 }
 
-interface Methods {
-  get: <T>(id: string, promise: Promise<T>) => Promise<T>;
-  list: <T>(promise: Promise<T[]>) => Promise<T[]>;
-  update: <T>(id: string, promise: Promise<T>) => Promise<T>;
-  remove: <T>(id: string, promise: Promise<T>) => Promise<string>;
-  create: <T>(promise: Promise<T>) => Promise<T>;
+interface Methods<T> {
+  get: (id: string, promise: Promise<T>) => Promise<T>;
+  list: (promise: Promise<T[]>) => Promise<T[]>;
+  update: (id: string, promise: Promise<T>) => Promise<T>;
+  remove: (id: string, promise: Promise<T>) => Promise<string>;
+  create: (promise: Promise<T>) => Promise<T>;
   select: (id: string) => void;
 }
 ```
