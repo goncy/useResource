@@ -2,7 +2,7 @@
 Using async resources without tears (and boilerplate)
 
 ## Demo
-[https://codesandbox.io/s/useresource-hook-demo-y9sw9](Codesandbox)
+[Codesandbox](https://codesandbox.io/s/useresource-hook-demo-y9sw9)
 
 ## Installation
 ```bash
