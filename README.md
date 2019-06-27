@@ -31,7 +31,7 @@ state => {
 }
 
 Once is resolved
-state.resouces => [{id: "1", name: "Gonzalo", meta: {error: null, action: null}}]
+state.resources => [{id: "1", name: "Gonzalo", meta: {error: null, action: null}}]
 
 On Error
 state => {
