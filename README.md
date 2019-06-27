@@ -14,13 +14,37 @@ interface User {
 }
 
 // Each function should return a promise that returns a `User` when resolves
-const [state, actions] = useResource<User>({
-  get: api.user.get,
-  list: api.user.list,
-  create: api.user.create,
-  update: api.user.update,
-  remove: api.user.remove,
-});
+const [state, actions] = useResource<User>();
+
+actions.list(api.users.list());
+
+/*
+When the promise is called
+state => {
+  error: null,
+  action: 'list',
+  resources: [],
+  selected: null
+}
+
+Once is resolved
+state.resouces => [{id: "1", name: "Gonzalo", meta: {error: null, action: null}}]
+
+On Error
+state => {
+  error: 'Error returned by the server',
+  action: null,
+  resources: [],
+  selected: null
+}
+*/
+
+// Also you can use its promise
+actions.list(api.users.list()).then((users: User[]) => actions.select(users[0].id));
+
+/*
+state.selected => {id: "1", name: "Gonzalo", meta: {error: null, action: null}}
+*/
 ```
 
 ## Types
@@ -41,12 +65,12 @@ interface State<T> {
   error: null | string;
 }
 
-interface Methods<T> {
-  get: (id: string, options?: any) => Promise<T>;
-  list: (options?: any) => Promise<T[]>;
-  update: (resource: Partial<T>, options?: any) => Promise<T>;
-  remove: (id: string, options?: any) => Promise<string>;
-  create: (resource: Partial<T>, options?: any) => Promise<T>;
-  select: (id: string) => T;
+interface Methods {
+  get: <T>(id: string, promise: Promise<T>) => Promise<T>;
+  list: <T>(promise: Promise<T[]>) => Promise<T[]>;
+  update: <T>(id: string, promise: Promise<T>) => Promise<T>;
+  remove: <T>(id: string, promise: Promise<T>) => Promise<string>;
+  create: <T>(promise: Promise<T>) => Promise<T>;
+  select: (id: string) => void;
 }
 ```
