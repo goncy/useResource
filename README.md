@@ -17,7 +17,7 @@ interface User {
 }
 
 // Each function should return a promise that returns a `User` when resolves
-const [state, actions] = useResource<User>();
+const [state, actions] = useResource<User>(); // `Options` can be passed
 
 actions.list(api.users.list());
 
@@ -53,6 +53,10 @@ state.selected => {id: "1", name: "Gonzalo", meta: {error: null, action: null}}
 ## Types
 ```ts
 type AsyncAction = 'get' | 'list' | 'update' | 'remove' | 'create';
+
+interface Options {
+  identifier: string // Property used to identify each resource, default: 'id'
+}
 
 interface Meta {
   meta: {

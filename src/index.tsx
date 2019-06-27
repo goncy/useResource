@@ -8,19 +8,23 @@ interface State<T> {
 }
 
 interface Methods<T> {
-  get: (id: string, promise: Promise<T>) => Promise<T>;
+  get: (identifier: string, promise: Promise<T>) => Promise<T>;
   list: (promise: Promise<T[]>) => Promise<T[]>;
-  update: (id: string, promise: Promise<T>) => Promise<T>;
-  remove: (id: string, promise: Promise<T>) => Promise<string>;
+  update: (identifier: string, promise: Promise<T>) => Promise<T>;
+  remove: (identifier: string, promise: Promise<T>) => Promise<string>;
   create: (promise: Promise<T>) => Promise<T>;
-  select: (id: string) => void;
+  select: (identifier: string) => void;
+}
+
+interface Options {
+  identifier: string;
 }
 
 // Actions
 type AsyncAction = 'get' | 'list' | 'update' | 'remove' | 'create';
 
 interface ActionError {
-  id: string;
+  identifier: string;
   message: string;
 }
 
@@ -66,9 +70,14 @@ const EMPTY_RESOURCE_MANAGER = {
   selected: null,
 };
 
+const DEFAULT_OPTIONS = {
+  identifier: 'id'
+}
+
 function resourceManagerReducer(
   state: ResourceManager = EMPTY_RESOURCE_MANAGER,
-  action: Action
+  action: Action,
+  options: Options = DEFAULT_OPTIONS
 ): ResourceManager {
   switch (action.type) {
     // STARTED
@@ -81,7 +90,7 @@ function resourceManagerReducer(
           ...state.list,
           [action.payload]: {
             ...state.list[action.payload],
-            id: action.payload,
+            [options.identifier]: action.payload,
             meta: {
               action: 'get',
               error: null,
@@ -153,7 +162,7 @@ function resourceManagerReducer(
         action: null,
         list: {
           ...state.list,
-          [action.payload.id]: {
+          [action.payload[options.identifier]]: {
             ...action.payload,
             meta: {
               action: null,
@@ -171,11 +180,11 @@ function resourceManagerReducer(
         action: null,
         list: action.payload.reduce(
           (acc: Dictionary<any>, resource: any) =>
-            acc[resource.id]
+            acc[resource[options.identifier]]
               ? acc
               : {
                   ...acc,
-                  [resource.id]: {
+                  [resource[options.identifier]]: {
                     ...resource,
                     meta: {
                       action: null,
@@ -213,8 +222,8 @@ function resourceManagerReducer(
         action: null,
         list: {
           ...state.list,
-          [action.payload.id]: {
-            ...state.list[action.payload.id],
+          [action.payload.identifier]: {
+            ...state.list[action.payload.identifier],
             meta: {
               action: null,
               error: action.payload.message,
@@ -245,17 +254,17 @@ function resourceManagerReducer(
   }
 }
 
-export default function useResource<T = any>(): [State<T>, Methods<T>] {
+export default function useResource<T = any>(options?: Options): [State<T>, Methods<T>] {
   const reducer = React.useCallback(
     (state: ResourceManager, action: Action): ResourceManager =>
-    resourceManagerReducer(state, action),
-    []
+    resourceManagerReducer(state, action, options),
+    [options]
   );
 
   const [state, dispatch] = React.useReducer(reducer, EMPTY_RESOURCE_MANAGER);
 
-  const handleGet = React.useCallback((id: string, promise: Promise<T>): Promise<T> => {
-    dispatch({ type: 'GET_RESOURCE_STARTED', payload: id });
+  const handleGet = React.useCallback((identifier: string, promise: Promise<T>): Promise<T> => {
+    dispatch({ type: 'GET_RESOURCE_STARTED', payload: identifier });
 
     return promise
       .then(
@@ -271,7 +280,7 @@ export default function useResource<T = any>(): [State<T>, Methods<T>] {
       .catch((error: Error) => {
         dispatch({
           type: 'GET_RESOURCE_REJECTED',
-          payload: { id, message: error.message },
+          payload: { identifier, message: error.message },
         });
 
         throw error.message;
@@ -300,8 +309,8 @@ export default function useResource<T = any>(): [State<T>, Methods<T>] {
       });
   }, [dispatch])
 
-  const handleUpdate = React.useCallback((id: string, promise: Promise<T>): Promise<T> => {
-    dispatch({ type: 'UPDATE_RESOURCE_STARTED', payload: id });
+  const handleUpdate = React.useCallback((identifier: string, promise: Promise<T>): Promise<T> => {
+    dispatch({ type: 'UPDATE_RESOURCE_STARTED', payload: identifier });
 
     return promise
       .then(
@@ -317,7 +326,7 @@ export default function useResource<T = any>(): [State<T>, Methods<T>] {
       .catch((error: Error) => {
         dispatch({
           type: 'UPDATE_RESOURCE_REJECTED',
-          payload: { id, message: error.message },
+          payload: { identifier, message: error.message },
         });
 
         throw error.message;
@@ -348,30 +357,30 @@ export default function useResource<T = any>(): [State<T>, Methods<T>] {
       });
   }, [dispatch])
 
-  const handleRemove = React.useCallback((id: string, promise: Promise<T>): Promise<string> => {
-    dispatch({ type: 'REMOVE_RESOURCE_STARTED', payload: id });
+  const handleRemove = React.useCallback((identifier: string, promise: Promise<T>): Promise<string> => {
+    dispatch({ type: 'REMOVE_RESOURCE_STARTED', payload: identifier });
 
     return promise
       .then((): string => {
         dispatch({
           type: 'REMOVE_RESOURCE_RESOLVED',
-          payload: id,
+          payload: identifier,
         });
 
-        return id;
+        return identifier;
       })
       .catch((error: Error) => {
         dispatch({
           type: 'REMOVE_RESOURCE_REJECTED',
-          payload: { id, message: error.message },
+          payload: { identifier, message: error.message },
         });
 
         throw error.message;
       });
   }, [dispatch])
 
-  const handleSelect = React.useCallback((id: string) => {
-    dispatch({ type: 'SELECT_RESOURCE', payload: id });
+  const handleSelect = React.useCallback((identifier: string) => {
+    dispatch({ type: 'SELECT_RESOURCE', payload: identifier });
   }, [dispatch])
 
   const manager = React.useMemo(() => ({
