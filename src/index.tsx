@@ -357,7 +357,7 @@ export default function useResource<T = any>(options?: Options): [State<T>, Meth
       });
   }, [dispatch])
 
-  const handleRemove = React.useCallback((identifier: string, promise: Promise<T>): Promise<string> => {
+  const handleRemove = React.useCallback((identifier: string, promise: Promise<T | string | void>): Promise<string> => {
     dispatch({ type: 'REMOVE_RESOURCE_STARTED', payload: identifier });
 
     return promise
