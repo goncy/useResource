@@ -11,7 +11,7 @@ interface Methods<T> {
   get: (identifier: string, promise: Promise<T>) => Promise<T>;
   list: (promise: Promise<T[]>) => Promise<T[]>;
   update: (identifier: string, promise: Promise<T>) => Promise<T>;
-  remove: (identifier: string, promise: Promise<T>) => Promise<string>;
+  remove: (identifier: string, promise: Promise<T | string | void>) => Promise<string>;
   create: (promise: Promise<T>) => Promise<T>;
   select: (identifier: string) => void;
 }
