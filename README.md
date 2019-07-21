@@ -58,6 +58,10 @@ interface Options {
   identifier: string // Property used to identify each resource, default: 'id'
 }
 
+interface ListOptions {
+  merge?: boolean;
+}
+
 interface Meta {
   meta: {
     action: null | AsyncAction;
@@ -73,11 +77,12 @@ interface State<T> {
 }
 
 interface Methods<T> {
-  get: (id: string, promise: Promise<T>) => Promise<T>;
-  list: (promise: Promise<T[]>) => Promise<T[]>;
-  update: (id: string, promise: Promise<T>) => Promise<T>;
-  remove: (id: string, promise: Promise<T>) => Promise<string>;
+  get: (identifier: string, promise: Promise<T>) => Promise<T>;
+  list: (promise: Promise<T[]>, options?: ListOptions) => Promise<T[]>;
+  update: (identifier: string, promise: Promise<T>) => Promise<T>;
+  remove: (identifier: string, promise: Promise<T | string | void>) => Promise<string>;
   create: (promise: Promise<T>) => Promise<T>;
-  select: (id: string) => void;
+  select: (identifier: string) => void;
+  reset: () => void;
 }
 ```

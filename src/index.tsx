@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 // Output
 interface State<T> {
   list: (T & Meta)[];
@@ -9,15 +10,21 @@ interface State<T> {
 
 interface Methods<T> {
   get: (identifier: string, promise: Promise<T>) => Promise<T>;
-  list: (promise: Promise<T[]>) => Promise<T[]>;
+  list: (promise: Promise<T[]>, options?: ListOptions) => Promise<T[]>;
   update: (identifier: string, promise: Promise<T>) => Promise<T>;
   remove: (identifier: string, promise: Promise<T | string | void>) => Promise<string>;
   create: (promise: Promise<T>) => Promise<T>;
   select: (identifier: string) => void;
+  reset: () => void;
 }
 
 interface Options {
   identifier: string;
+}
+
+// Methods options
+interface ListOptions {
+  merge?: boolean;
 }
 
 // Actions
@@ -29,11 +36,12 @@ interface ActionError {
 }
 
 type Action<T = any> =
+  | { type: 'RESET'; }
   | { type: 'GET_RESOURCE_STARTED'; payload: string }
   | { type: 'GET_RESOURCE_RESOLVED'; payload: T }
   | { type: 'GET_RESOURCE_REJECTED'; payload: ActionError }
   | { type: 'LIST_RESOURCE_STARTED' }
-  | { type: 'LIST_RESOURCE_RESOLVED'; payload: T[] }
+  | { type: 'LIST_RESOURCE_RESOLVED'; payload: T[]; meta: ListOptions }
   | { type: 'LIST_RESOURCE_REJECTED'; payload: string }
   | { type: 'UPDATE_RESOURCE_STARTED'; payload: string }
   | { type: 'UPDATE_RESOURCE_RESOLVED'; payload: T }
@@ -192,7 +200,7 @@ function resourceManagerReducer(
                     },
                   },
                 },
-          {}
+          action.meta.merge ? state.list : {}
         ),
       };
     }
@@ -249,6 +257,12 @@ function resourceManagerReducer(
       };
     }
 
+    // RESET
+    case 'RESET': {
+      return EMPTY_RESOURCE_MANAGER;
+    }
+
+    // DEFAULT
     default:
       return state;
   }
@@ -287,7 +301,7 @@ export default function useResource<T = any>(options?: Options): [State<T>, Meth
       });
   }, [dispatch])
 
-  const handleList = React.useCallback((promise: Promise<T[]>): Promise<T[]> => {
+  const handleList = React.useCallback((promise: Promise<T[]>, options: ListOptions = {}): Promise<T[]> => {
     dispatch({ type: 'LIST_RESOURCE_STARTED' });
 
     return promise
@@ -295,6 +309,7 @@ export default function useResource<T = any>(options?: Options): [State<T>, Meth
         dispatch({
           type: 'LIST_RESOURCE_RESOLVED',
           payload: list,
+          meta: options
         });
 
         return list;
@@ -383,6 +398,10 @@ export default function useResource<T = any>(options?: Options): [State<T>, Meth
     dispatch({ type: 'SELECT_RESOURCE', payload: identifier });
   }, [dispatch])
 
+  const handleReset = React.useCallback(() => {
+    dispatch({ type: 'RESET' });
+  }, [dispatch])
+
   const manager = React.useMemo(() => ({
     list: Object.values(state.list),
     selected: state.selected ? state.list[state.selected] : null,
@@ -393,11 +412,12 @@ export default function useResource<T = any>(options?: Options): [State<T>, Meth
   const actions = React.useMemo(() => ({
     get: handleGet,
     list: handleList,
+    reset: handleReset,
     update: handleUpdate,
     remove: handleRemove,
     create: handleCreate,
     select: handleSelect,
-  }), [handleGet, handleList, handleUpdate, handleRemove, handleCreate, handleSelect])
+  }), [handleGet, handleList, handleReset, handleUpdate, handleRemove, handleCreate, handleSelect])
 
   return [
     manager,
