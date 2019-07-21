@@ -24,7 +24,7 @@ interface Options {
 
 // Methods options
 interface ListOptions {
-  merge?: boolean;
+  reset?: boolean;
 }
 
 // Actions
@@ -200,7 +200,7 @@ function resourceManagerReducer(
                     },
                   },
                 },
-          action.meta.merge ? state.list : {}
+          action.meta.reset ? {} : state.list
         ),
       };
     }

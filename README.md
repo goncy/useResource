@@ -59,7 +59,7 @@ interface Options {
 }
 
 interface ListOptions {
-  merge?: boolean;
+  reset?: boolean;
 }
 
 interface Meta {
